@@ -91,5 +91,18 @@ class ProductVariationTest extends TestCase
         $this->assertEquals(5, $product->loadCount('stocks as count')->count);
     }
 
+    public function test_it_has_stock_information()
+    {
+        $product = ProductVariation::factory()->create();
+        $product->stocks()->saveMany(Stock::factory(5)->make([
+            'quantity' => 2
+        ]));
+        $stockData = $product->getStock()->toArray();
+        $this->assertArrayHasKey('quantity_left', $stockData);
+        $this->assertEquals(10, $stockData['quantity_left']);
+        $this->assertArrayHasKey('in_stock', $stockData);
+        $this->assertTrue((bool) $stockData['in_stock']);
+    }
+
 
 }

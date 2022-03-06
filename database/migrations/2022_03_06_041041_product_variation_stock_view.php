@@ -13,7 +13,9 @@ class ProductVariationStockView extends Migration
      */
     public function up()
     {
-        \Illuminate\Support\Facades\DB::statement("CREATE VIEW product_variation_stock_view AS SELECT
+        \Illuminate\Support\Facades\DB::statement("DROP VIEW IF EXISTS product_variation_stock_view");
+        \Illuminate\Support\Facades\DB::statement("
+        CREATE VIEW product_variation_stock_view AS SELECT
 product_variations.product_id AS product_id,
 product_variations.id AS product_variation_id,
 COALESCE ( stocks_custom.quantity, 0 ) AS quantity,
