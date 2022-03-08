@@ -50,7 +50,7 @@ class ProductVariation extends Model
 
     public function getStock()
     {
-        return $this->stock()->first()->pivot;
+        return $this->stock->first()->pivot;
     }
 
 }

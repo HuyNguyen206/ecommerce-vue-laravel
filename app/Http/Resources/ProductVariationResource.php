@@ -18,13 +18,14 @@ class ProductVariationResource extends JsonResource
         if ($this->resource instanceof Collection) {
             return ProductVariationResource::collection($this->resource);
         }
+        $stockData = $this->getStock();
         return [
             'id' => $this->id,
             'name' => $this->name,
             'price' => $this->formattedPrice,
             'price_varies' => $this->priceVaries(),
-            'stock_count' => (int) $this->getStock()->quantity_left,
-            'in_stock' => $this->getStock()->in_stock
+            'stock_count' => (int) $stockData->quantity_left,
+            'in_stock' => $stockData->in_stock
         ];
     }
 }
