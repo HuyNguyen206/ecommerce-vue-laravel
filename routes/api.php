@@ -23,4 +23,8 @@ Route::resource('products', \App\Http\Controllers\ProductController::class);
 
 Route::prefix('auth')->group(function (){
     Route::post('register', [\App\Http\Controllers\Auth\RegisterController::class, 'register']);
+    Route::post('login', [\App\Http\Controllers\Auth\LoginController::class, 'login']);
+    Route::get('me', [\App\Http\Controllers\Auth\MeController::class, 'me']);
 });
+
+Route::resource('carts', \App\Http\Controllers\CartController::class);

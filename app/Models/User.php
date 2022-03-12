@@ -66,8 +66,14 @@ class User extends Authenticatable implements JWTSubject
 
     protected static function booted()
     {
-        static::creating(function(User $user) {
-           $user->password = bcrypt($user->password);
-        });
+//        static::creating(function(User $user) {
+//           $user->password = bcrypt($user->password);
+//        });
+    }
+
+    public function cart()
+    {
+        return $this->belongsToMany(ProductVariation::class, 'cart_user')
+            ->withPivot('quantity');
     }
 }

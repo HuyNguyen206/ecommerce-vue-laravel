@@ -53,4 +53,9 @@ class ProductVariation extends Model
         return $this->stock->first()->pivot;
     }
 
+    public function buyer()
+    {
+        return $this->belongsToMany(User::class, 'cart_user');
+    }
+
 }
