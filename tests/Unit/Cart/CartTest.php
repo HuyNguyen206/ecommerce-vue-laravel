@@ -57,4 +57,45 @@ class CartTest extends TestCase
         $this->assertDatabaseCount('cart_user', 3);
         $this->assertEquals(3, $user->cart->first()->pivot->quantity);
     }
+    public function test_it_can_update_quantity_in_the_cart()
+    {
+        $products = ProductVariation::factory(3)->create()
+            ->map(function ($product){
+                $product = $product->only(['id']);
+                $product['quantity'] =  2;
+                return $product;
+            })->toArray();
+        $cart = new Cart($user = User::factory()->create());
+        $cart->add($products);
+        $cart->update(1, 4);
+        $this->assertEquals(4, $user->fresh()->cart->first()->pivot->quantity);
+    }
+
+    public function test_it_can_delete_product_in_the_cart()
+    {
+        $products = ProductVariation::factory(3)->create()
+            ->map(function ($product){
+                $product = $product->only(['id']);
+                $product['quantity'] =  2;
+                return $product;
+            })->toArray();
+        $cart = new Cart($user = User::factory()->create());
+        $cart->add($products);
+        $cart->destroy(1);
+        $this->assertEquals(2, $user->fresh()->cart->count());
+    }
+
+    public function test_it_can_empty_the_cart()
+    {
+        $products = ProductVariation::factory(3)->create()
+            ->map(function ($product){
+                $product = $product->only(['id']);
+                $product['quantity'] =  2;
+                return $product;
+            })->toArray();
+        $cart = new Cart($user = User::factory()->create());
+        $cart->add($products);
+        $cart->emptyCart();
+        $this->assertEquals(0, $user->fresh()->cart->count());
+    }
 }

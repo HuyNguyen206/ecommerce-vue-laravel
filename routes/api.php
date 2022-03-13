@@ -27,4 +27,10 @@ Route::prefix('auth')->group(function (){
     Route::get('me', [\App\Http\Controllers\Auth\MeController::class, 'me']);
 });
 
-Route::resource('carts', \App\Http\Controllers\CartController::class);
+Route::resource('carts', \App\Http\Controllers\CartController::class)->parameters([
+    'carts' => 'productVariation'
+]);
+
+Route::middleware('auth')->get('token/invalidate-token', function (){
+    auth()->invalidate(true);
+});

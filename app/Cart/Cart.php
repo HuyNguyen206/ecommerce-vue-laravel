@@ -35,4 +35,21 @@ class Cart
         }
         return 0;
     }
+
+    public function update($productId, $quantity)
+    {
+        $this->user->cart()->updateExistingPivot($productId, [
+            'quantity' => $quantity
+        ]);
+    }
+
+    public function destroy($productId)
+    {
+        $this->user->cart()->detach($productId);
+    }
+
+    public function emptyCart()
+    {
+        $this->user->cart()->detach();
+    }
 }

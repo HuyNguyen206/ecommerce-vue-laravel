@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Cart\Cart;
 use App\Http\Requests\Cart\CartStoreRequest;
-use Illuminate\Http\Request;
+use App\Http\Requests\CartUpdateRequest;
+use App\Http\Resources\Cart\CartResource;
+use App\Models\ProductVariation;
 
 class CartController extends Controller
 {
@@ -22,7 +24,7 @@ class CartController extends Controller
      */
     public function index()
     {
-        //
+       return CartResource::make(\request()->user()->load(['cart.product', 'cart.stock']));
     }
 
     /**
@@ -54,9 +56,9 @@ class CartController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(ProductVariation $productVariation, CartUpdateRequest $request)
     {
-        //
+       $this->cart->update($productVariation->id, $request->quantity);
     }
 
     /**
@@ -65,8 +67,8 @@ class CartController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(ProductVariation $productVariation)
     {
-        //
+        $this->cart->destroy($productVariation->id);
     }
 }
