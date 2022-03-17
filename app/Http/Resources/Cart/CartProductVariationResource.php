@@ -26,8 +26,4 @@ class CartProductVariationResource extends ProductVariationResource
         ]);
     }
 
-    protected function getTotal($quantity, $price)
-    {
-        return new Money($quantity * $price->amount());
-    }
 }

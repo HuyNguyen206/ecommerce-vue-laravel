@@ -37,6 +37,12 @@ class ProductVariation extends Model
         return $this->hasMany(Stock::class);
     }
 
+//    public function stockCountAvailable()
+//    {
+////        dd($this->stocks);
+//        return $this->loadSum('stocks as stockCount', 'quantity')->stockCount;
+//    }
+
     public function stock()
     {
         return $this->belongsToMany(
@@ -56,6 +62,16 @@ class ProductVariation extends Model
     public function buyer()
     {
         return $this->belongsToMany(User::class, 'cart_user');
+    }
+
+    public function getTotal($quantity, $price)
+    {
+        return new Money($quantity * $price->amount());
+    }
+
+    public function minStock($originQuantity)
+    {
+      return (int) min($this->getStock()->quantity, $originQuantity);
     }
 
 }

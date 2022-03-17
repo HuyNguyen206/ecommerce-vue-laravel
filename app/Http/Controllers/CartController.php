@@ -7,6 +7,7 @@ use App\Http\Requests\Cart\CartStoreRequest;
 use App\Http\Requests\CartUpdateRequest;
 use App\Http\Resources\Cart\CartResource;
 use App\Models\ProductVariation;
+use Illuminate\Http\Request;
 
 class CartController extends Controller
 {
@@ -24,7 +25,19 @@ class CartController extends Controller
      */
     public function index()
     {
-       return CartResource::make(\request()->user()->load(['cart.product', 'cart.stock']));
+        $this->cart->sync();
+       return CartResource::make(\request()->user()->load(['cart.product', 'cart.stock']))->additional([
+           'meta' => $this->meta(request()),
+       ]);
+    }
+
+    protected function meta(Request $request)
+    {
+        return [
+            'is_empty' => $this->cart->isEmpty(),
+             'subtotal' => $this->cart->subTotal()->formatted(),
+             'total' => $this->cart->total()->formatted()
+        ];
     }
 
     /**

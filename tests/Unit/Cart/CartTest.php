@@ -98,4 +98,50 @@ class CartTest extends TestCase
         $cart->emptyCart();
         $this->assertEquals(0, $user->fresh()->cart->count());
     }
+
+    public function test_it_can_check_if_the_cart_is_empty_of_quantity()
+    {
+        $products = ProductVariation::factory(3)->create()
+            ->map(function ($product){
+                $product = $product->only(['id']);
+                $product['quantity'] =  0;
+                return $product;
+            })->toArray();
+        $cart = new Cart($user = User::factory()->create());
+        $cart->add($products);
+        $this->assertTrue($cart->isEmpty());
+    }
+
+    public function test_it_return_subtotal()
+    {
+        $products = ProductVariation::factory(3)->create([
+            'price' => 100
+        ])
+            ->map(function ($product){
+                $product = $product->only(['id']);
+                $product['quantity'] =  2;
+                return $product;
+            })->toArray();
+        $cart = new Cart($user = User::factory()->create());
+        $cart->add($products);
+        $user->refresh();
+        $this->assertEquals(600, $cart->subTotal()->amount());
+    }
+
+    public function test_it_return_total()
+    {
+        $products = ProductVariation::factory(3)->create([
+            'price' => 100
+        ])
+            ->map(function ($product){
+                $product = $product->only(['id']);
+                $product['quantity'] =  2;
+                return $product;
+            })->toArray();
+        $cart = new Cart($user = User::factory()->create());
+        $cart->add($products);
+        $user->refresh();
+        $this->assertEquals(600, $cart->total()->amount());
+    }
+
 }

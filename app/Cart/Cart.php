@@ -52,4 +52,35 @@ class Cart
     {
         $this->user->cart()->detach();
     }
+
+    public function isEmpty()
+    {
+        return $this->user->cart->sum('pivot.quantity') === 0;
+    }
+
+    public function subTotal()
+    {
+        $subTotal = $this->user->cart->sum(function ($product) {
+            return $product->getTotal($product->pivot->quantity,$product->price)->amount();
+        });
+        return (new Money($subTotal));
+    }
+
+    public function total()
+    {
+        return $this->subTotal();
+    }
+
+    public function sync()
+    {
+        $user = $this->user;
+        $user->cart->each(function ($product){
+            $quantity = $product->minStock($originQuantity = $product->pivot->quantity);
+            if ($quantity !== $originQuantity) {
+                $product->pivot->update([
+                    'quantity' => $quantity
+                ]);
+            }
+        });
+    }
 }
