@@ -29,7 +29,7 @@ class Product extends Model
     public function stockCount()
     {
         return $this->variations->sum(function ($variation){
-            return $variation->getStock()->quantity_left;
+            return $variation->getStock()->quantity;
         });
     }
 

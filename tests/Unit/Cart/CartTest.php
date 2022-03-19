@@ -18,9 +18,9 @@ class CartTest extends TestCase
     public function test_it_can_add_product_to_cart()
     {
         $products = ProductVariation::factory(3)->create()
-            ->map(function ($product){
+            ->map(function ($product) {
                 $product = $product->only(['id']);
-                $product['quantity'] =  random_int(1,4);
+                $product['quantity'] = random_int(1, 4);
                 return $product;
             })->toArray();
         $cart = new Cart($user = User::factory()->create());
@@ -37,18 +37,18 @@ class CartTest extends TestCase
     public function test_it_can_increase_quantity_when_add_more_product_to_cart()
     {
         $products = ProductVariation::factory(3)->create()
-            ->map(function ($product){
+            ->map(function ($product) {
                 $product = $product->only(['id']);
-                $product['quantity'] =  2;
+                $product['quantity'] = 2;
                 return $product;
             })->toArray();
         $cart = new Cart($user = User::factory()->create());
         $cart->add($products);
         $user->refresh();
         $productsAdd = ProductVariation::all()
-            ->map(function ($product){
+            ->map(function ($product) {
                 $product = $product->only(['id']);
-                $product['quantity'] =  1;
+                $product['quantity'] = 1;
                 return $product;
             })->toArray();
 //        dd($productsAdd);
@@ -57,12 +57,13 @@ class CartTest extends TestCase
         $this->assertDatabaseCount('cart_user', 3);
         $this->assertEquals(3, $user->cart->first()->pivot->quantity);
     }
+
     public function test_it_can_update_quantity_in_the_cart()
     {
         $products = ProductVariation::factory(3)->create()
-            ->map(function ($product){
+            ->map(function ($product) {
                 $product = $product->only(['id']);
-                $product['quantity'] =  2;
+                $product['quantity'] = 2;
                 return $product;
             })->toArray();
         $cart = new Cart($user = User::factory()->create());
@@ -74,9 +75,9 @@ class CartTest extends TestCase
     public function test_it_can_delete_product_in_the_cart()
     {
         $products = ProductVariation::factory(3)->create()
-            ->map(function ($product){
+            ->map(function ($product) {
                 $product = $product->only(['id']);
-                $product['quantity'] =  2;
+                $product['quantity'] = 2;
                 return $product;
             })->toArray();
         $cart = new Cart($user = User::factory()->create());
@@ -88,9 +89,9 @@ class CartTest extends TestCase
     public function test_it_can_empty_the_cart()
     {
         $products = ProductVariation::factory(3)->create()
-            ->map(function ($product){
+            ->map(function ($product) {
                 $product = $product->only(['id']);
-                $product['quantity'] =  2;
+                $product['quantity'] = 2;
                 return $product;
             })->toArray();
         $cart = new Cart($user = User::factory()->create());
@@ -102,9 +103,9 @@ class CartTest extends TestCase
     public function test_it_can_check_if_the_cart_is_empty_of_quantity()
     {
         $products = ProductVariation::factory(3)->create()
-            ->map(function ($product){
+            ->map(function ($product) {
                 $product = $product->only(['id']);
-                $product['quantity'] =  0;
+                $product['quantity'] = 0;
                 return $product;
             })->toArray();
         $cart = new Cart($user = User::factory()->create());
@@ -117,9 +118,9 @@ class CartTest extends TestCase
         $products = ProductVariation::factory(3)->create([
             'price' => 100
         ])
-            ->map(function ($product){
+            ->map(function ($product) {
                 $product = $product->only(['id']);
-                $product['quantity'] =  2;
+                $product['quantity'] = 2;
                 return $product;
             })->toArray();
         $cart = new Cart($user = User::factory()->create());
@@ -133,15 +134,62 @@ class CartTest extends TestCase
         $products = ProductVariation::factory(3)->create([
             'price' => 100
         ])
-            ->map(function ($product){
+            ->map(function ($product) {
                 $product = $product->only(['id']);
-                $product['quantity'] =  2;
+                $product['quantity'] = 2;
                 return $product;
             })->toArray();
+//        dd($products);
         $cart = new Cart($user = User::factory()->create());
         $cart->add($products);
         $user->refresh();
         $this->assertEquals(600, $cart->total()->amount());
     }
+
+
+    public function test_it_sync_the_cart_to_update_quantity()
+    {
+        $product = ProductVariation::factory()->create([
+            'price' => 100
+        ]);
+        $products = [
+                [
+                    "id" => $product->id,
+                    "quantity" => 10
+                ]
+        ];
+
+        $cart = new Cart($user = User::factory()->create());
+        $product->stocks()->create([
+            'quantity' => 5
+        ]);
+        $cart->add($products);
+        $user->refresh();
+        $cart->sync();
+        $this->assertTrue($cart->isChanged());
+    }
+
+    public function test_it_doesnt_change_cart_quantity()
+    {
+        $product = ProductVariation::factory()->create([
+            'price' => 100
+        ]);
+        $products = [
+                [
+                    "id" => $product->id,
+                    "quantity" => 10
+                ]
+        ];
+
+        $cart = new Cart($user = User::factory()->create());
+        $product->stocks()->create([
+            'quantity' => 20
+        ]);
+        $cart->add($products);
+        $user->refresh();
+        $cart->sync();
+        $this->assertFalse($cart->isChanged());
+    }
+
 
 }

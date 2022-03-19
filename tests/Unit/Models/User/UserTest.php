@@ -2,6 +2,8 @@
 
 namespace Tests\Unit\Models\User;
 
+use App\Models\Address;
+use App\Models\Country;
 use App\Models\ProductVariation;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -36,5 +38,13 @@ class UserTest extends TestCase
             $this->assertEquals(4, $productVariation->pivot->quantity);
         });
 //        $this->assertInstanceOf(ProductVariation::class, $user->cart->first());
+    }
+
+    public function test_user_have_many_addresses()
+    {
+        $user = User::factory()->create();
+        $user->addresses()->saveMany(Address::factory(3)->make());
+
+        $this->assertCount(3,$user->addresses);
     }
 }

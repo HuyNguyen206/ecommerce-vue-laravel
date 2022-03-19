@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Cart;
 
+use App\Cart\Cart;
 use App\Models\ProductVariation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -58,6 +59,29 @@ class CartIndexTest extends TestCase
                     'id' => $product->id,
         ])->assertJsonFragment([
             'is_empty' => true
+        ]);
+    }
+    public function test_it_sync_the_cart()
+    {
+        $product = ProductVariation::factory()->create([
+            'price' => 100
+        ]);
+        $products = [
+            [
+                "id" => $product->id,
+                "quantity" => 30
+            ]
+        ];
+
+        $cart = new Cart($user = User::factory()->create());
+        $product->stocks()->create([
+            'quantity' => 20
+        ]);
+        $cart->add($products);
+
+        $response = $this->jsonAs($user, 'get', "api/carts");
+        $response->assertJsonFragment([
+                    'changed' =>true,
         ]);
     }
 

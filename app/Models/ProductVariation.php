@@ -49,7 +49,7 @@ class ProductVariation extends Model
             ProductVariation::class,
             'product_variation_stock_view'
         )->withPivot([
-            'quantity', 'quantity_orderd', 'quantity_left',
+            'quantity', 'quantity_orderd',
             'in_stock'
         ]);
     }

@@ -7,6 +7,7 @@ use App\Models\User;
 class Cart
 {
     protected $user;
+    protected $changed = false;
 
     public function __construct(?User $user)
     {
@@ -20,6 +21,7 @@ class Cart
 
     protected function getStorePayload($products)
     {
+//        dd($products);
         $this->user->fresh('cart');
         return collect($products)->keyBy('id')->map(function ($product) {
             return [
@@ -55,11 +57,13 @@ class Cart
 
     public function isEmpty()
     {
+        $this->user->loadMissing('cart');
         return $this->user->cart->sum('pivot.quantity') === 0;
     }
 
     public function subTotal()
     {
+        $this->user->loadMissing('cart');
         $subTotal = $this->user->cart->sum(function ($product) {
             return $product->getTotal($product->pivot->quantity,$product->price)->amount();
         });
@@ -74,13 +78,19 @@ class Cart
     public function sync()
     {
         $user = $this->user;
-        $user->cart->each(function ($product){
+        $user->cart->load('stock')->each(function ($product){
             $quantity = $product->minStock($originQuantity = $product->pivot->quantity);
             if ($quantity !== $originQuantity) {
+                $this->changed = true;
                 $product->pivot->update([
                     'quantity' => $quantity
                 ]);
             }
         });
+    }
+
+    public function isChanged()
+    {
+        return $this->changed;
     }
 }

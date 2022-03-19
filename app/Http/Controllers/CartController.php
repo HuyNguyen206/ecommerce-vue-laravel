@@ -26,7 +26,7 @@ class CartController extends Controller
     public function index()
     {
         $this->cart->sync();
-       return CartResource::make(\request()->user()->load(['cart.product', 'cart.stock']))->additional([
+       return CartResource::make(\request()->user()->load(['cart.product', 'cart.stock', 'cart.type']))->additional([
            'meta' => $this->meta(request()),
        ]);
     }
@@ -34,9 +34,10 @@ class CartController extends Controller
     protected function meta(Request $request)
     {
         return [
-            'is_empty' => $this->cart->isEmpty(),
+             'is_empty' => $this->cart->isEmpty(),
              'subtotal' => $this->cart->subTotal()->formatted(),
-             'total' => $this->cart->total()->formatted()
+             'total' => $this->cart->total()->formatted(),
+             'changed' => $this->cart->isChanged()
         ];
     }
 
@@ -49,6 +50,7 @@ class CartController extends Controller
     public function store(CartStoreRequest $request)
     {
         $this->cart->add($request->products);
+        return response()->json([], 201);
     }
 
     /**
