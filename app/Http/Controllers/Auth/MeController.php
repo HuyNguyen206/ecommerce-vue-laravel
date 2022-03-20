@@ -10,11 +10,20 @@ class MeController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth:api');
+        $this->middleware('auth:api')->only('me');
     }
 
     public function me()
     {
         return new PrivateUserResource(\request()->user());
-   }
+    }
+
+    public function refresh()
+    {
+        return $this->json([
+            'meta' => [
+                'access_token' => auth()->refresh(),
+            ]]);
+    }
+
 }

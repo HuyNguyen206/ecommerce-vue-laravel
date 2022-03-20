@@ -7,5 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Country extends Model
 {
+    protected static $unguarded = true;
     use HasFactory;
 }
