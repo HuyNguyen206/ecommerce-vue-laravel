@@ -20,8 +20,7 @@ product_variations.product_id AS product_id,
 product_variations.id AS product_variation_id,
 COALESCE ( stocks_custom.quantity, 0 ) AS quantity,
 COALESCE ( product_variation_order.quantity, 0 ) AS quantity_orderd,
-COALESCE ( stocks_custom.quantity, 0 ) - COALESCE ( product_variation_order.quantity, 0 ) AS quantity_left,
-CASE WHEN COALESCE ( stocks_custom.quantity, 0 ) - COALESCE ( product_variation_order.quantity, 0 ) > 0 THEN
+CASE WHEN COALESCE ( stocks_custom.quantity, 0 ) > 0 THEN
 	TRUE ELSE FALSE
 	END in_stock
 FROM

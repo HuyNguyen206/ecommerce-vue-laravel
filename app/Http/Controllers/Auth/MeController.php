@@ -20,7 +20,7 @@ class MeController extends Controller
 
     public function refresh()
     {
-        return $this->json([
+        return response()->json([
             'meta' => [
                 'access_token' => auth()->refresh(),
             ]]);

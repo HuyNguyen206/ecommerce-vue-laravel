@@ -20,7 +20,8 @@ use Illuminate\Support\Facades\Route;
 Route::resources([
     'categories' => \App\Http\Controllers\CategoryController::class,
     'products' => \App\Http\Controllers\ProductController::class,
-    'addresses' => \App\Http\Controllers\AddressController::class
+    'addresses' => \App\Http\Controllers\AddressController::class,
+    'countries' => \App\Http\Controllers\CountryController::class
 ]);
 Route::prefix('auth')->group(function (){
     Route::post('register', [\App\Http\Controllers\Auth\RegisterController::class, 'register']);
