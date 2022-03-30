@@ -29,4 +29,10 @@ class Money
     {
         return $this->money->getAmount();
     }
+
+    public function add(Money $money)
+    {
+        $this->money = $this->money->add($money->money);
+        return $this;
+    }
 }

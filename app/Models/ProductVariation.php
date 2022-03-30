@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Cart\Money;
+use App\Models\Collections\ProductVatiationCollection;
 use App\Models\Traits\HasPrice;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -72,6 +73,11 @@ class ProductVariation extends Model
     public function minStock($originQuantity)
     {
       return (int) min($this->getStock()->quantity, $originQuantity);
+    }
+
+    public function newCollection(array $models = [])
+    {
+        return new ProductVatiationCollection($models);
     }
 
 }

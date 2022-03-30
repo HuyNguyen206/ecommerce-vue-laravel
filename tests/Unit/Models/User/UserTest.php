@@ -4,6 +4,7 @@ namespace Tests\Unit\Models\User;
 
 use App\Models\Address;
 use App\Models\Country;
+use App\Models\Order;
 use App\Models\ProductVariation;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -47,4 +48,13 @@ class UserTest extends TestCase
 
         $this->assertCount(3,$user->addresses);
     }
+
+    public function test_user_have_many_orders()
+    {
+        $user = User::factory()->create();
+        $user->orders()->saveMany(Order::factory(3)->make());
+
+        $this->assertEquals(3,$user->orders()->count());
+    }
+
 }

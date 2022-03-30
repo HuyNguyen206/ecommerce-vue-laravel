@@ -20,9 +20,11 @@ use Illuminate\Support\Facades\Route;
 Route::resources([
     'categories' => \App\Http\Controllers\CategoryController::class,
     'products' => \App\Http\Controllers\ProductController::class,
-    'addresses' => \App\Http\Controllers\AddressController::class,
-    'countries' => \App\Http\Controllers\CountryController::class
+    'countries' => \App\Http\Controllers\CountryController::class,
+    'orders' => \App\Http\Controllers\OrderControler::class
 ]);
+Route::resource('addresses',\App\Http\Controllers\AddressController::class)->only('index');
+Route::get('addresses/{address}/shippings', [\App\Http\Controllers\AddressController::class, 'getShippingMethods']);
 Route::prefix('auth')->group(function (){
     Route::post('register', [\App\Http\Controllers\Auth\RegisterController::class, 'register']);
     Route::post('login', [\App\Http\Controllers\Auth\LoginController::class, 'login']);

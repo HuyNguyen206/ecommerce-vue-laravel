@@ -9,4 +9,11 @@ class Country extends Model
 {
     protected static $unguarded = true;
     use HasFactory;
+
+    public function shippingMethods()
+    {
+        return $this->belongsToMany(ShippingMethod::class, 'country_shipping_method');
+    }
+
+
 }

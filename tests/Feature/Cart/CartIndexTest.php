@@ -3,7 +3,9 @@
 namespace Tests\Feature\Cart;
 
 use App\Cart\Cart;
+use App\Cart\Money;
 use App\Models\ProductVariation;
+use App\Models\ShippingMethod;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -82,6 +84,33 @@ class CartIndexTest extends TestCase
         $response = $this->jsonAs($user, 'get', "api/carts");
         $response->assertJsonFragment([
                     'changed' =>true,
+        ]);
+    }
+
+
+    public function test_it_show_the_formatted_total_with_shipping()
+    {
+        $product = ProductVariation::factory()->create([
+            'price' => 100
+        ]);
+        $products = [
+            [
+                "id" => $product->id,
+                "quantity" => 30
+            ]
+        ];
+        $product->stocks()->create([
+            'quantity' => 20
+        ]);
+        $cart = new Cart($user = User::factory()->create());
+        $cart->add($products);
+        $user->refresh();
+        $shipping = ShippingMethod::factory()->create([
+            'price' => 100
+        ]);
+        $response = $this->jsonAs($user, 'get', "api/carts?shipping_method_id=$shipping->id");
+        $response->assertJsonFragment([
+                    'total' => (new Money(2100))->formatted(),
         ]);
     }
 

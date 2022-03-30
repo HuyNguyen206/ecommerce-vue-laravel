@@ -2,12 +2,14 @@
 
 namespace App\Cart;
 
+use App\Models\ShippingMethod;
 use App\Models\User;
 
 class Cart
 {
     protected $user;
     protected $changed = false;
+    protected $shippingId;
 
     public function __construct(?User $user)
     {
@@ -72,7 +74,11 @@ class Cart
 
     public function total()
     {
-        return $this->subTotal();
+        $subTotal = $this->subTotal();
+        if ($this->shippingId) {
+            $subTotal->add(ShippingMethod::find($this->shippingId)->price);
+        }
+        return $subTotal;
     }
 
     public function sync()
@@ -93,4 +99,16 @@ class Cart
     {
         return $this->changed;
     }
+
+    public function withShipping($shippingId)
+    {
+        $this->shippingId = $shippingId;
+        return $this;
+    }
+
+    public function products()
+    {
+        return $this->user->cart;
+    }
+
 }

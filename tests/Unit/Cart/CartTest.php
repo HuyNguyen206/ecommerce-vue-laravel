@@ -3,7 +3,10 @@
 namespace Tests\Unit\Cart;
 
 use App\Cart\Cart;
+use App\Models\Address;
+use App\Models\Country;
 use App\Models\ProductVariation;
+use App\Models\ShippingMethod;
 use App\Models\User;
 use Tests\TestCase;
 
@@ -189,6 +192,68 @@ class CartTest extends TestCase
         $user->refresh();
         $cart->sync();
         $this->assertFalse($cart->isChanged());
+    }
+
+    public function test_it_can_return_the_correct_total_without_shipping()
+    {
+        $product = ProductVariation::factory()->create([
+            'price' => 100
+        ]);
+        $products = [
+                [
+                    "id" => $product->id,
+                    "quantity" => 10
+                ]
+        ];
+
+        $cart = new Cart($user = User::factory()->create());
+        $product->stocks()->create([
+            'quantity' => 20
+        ]);
+        $cart->add($products);
+        $user->refresh();
+        $this->assertEquals(1000, $cart->total()->amount());
+    }
+
+    public function test_it_can_return_the_correct_total_with_shipping()
+    {
+        $product = ProductVariation::factory()->create([
+            'price' => 100
+        ]);
+        $products = [
+                [
+                    "id" => $product->id,
+                    "quantity" => 10
+                ]
+        ];
+
+        $cart = new Cart($user = User::factory()->create());
+        $product->stocks()->create([
+            'quantity' => 20
+        ]);
+        $cart->add($products);
+        Address::factory()->create([
+            'user_id' => $user->id,
+            'country_id' => ($country = Country::factory()->create())->id
+        ]);
+        $country->shippingMethods()->attach($shipping = ShippingMethod::factory()->create(
+            [
+                'price' => 100
+            ]
+        ));
+        $user->refresh();
+        $this->assertEquals(1100, $cart->withShipping($shipping->id)->total()->amount());
+    }
+
+    public function test_it_return_products_in_cart()
+    {
+        $cart = new Cart($user = User::factory()->create());
+        $user->cart()->attach($product = ProductVariation::factory()->create([
+            'price' => 100
+        ]), [
+            'quantity' => 3
+        ]);
+        $this->assertInstanceOf(ProductVariation::class, $cart->products()->first());
     }
 
 

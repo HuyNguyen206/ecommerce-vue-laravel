@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\AddressStoreRequest;
 use App\Http\Resources\AddressResource;
+use App\Http\Resources\ShippingMethodResource;
 use App\Models\Address;
+use App\Models\ShippingMethod;
 use Illuminate\Http\Request;
 
 class AddressController extends Controller
@@ -70,5 +72,11 @@ class AddressController extends Controller
     public function destroy($id)
     {
         //
+    }
+
+    public function getShippingMethods(Address $address)
+    {
+        $this->authorize('view', $address);
+        return response()->json(ShippingMethodResource::collection($address->country->shippingMethods));
     }
 }
