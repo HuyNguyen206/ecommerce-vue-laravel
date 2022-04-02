@@ -5,9 +5,8 @@ namespace App\Http\Middleware\Cart;
 use App\Cart\Cart;
 use Closure;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
-class Sync
+class ResponseIfEmpty
 {
     protected $cart;
 
@@ -15,7 +14,6 @@ class Sync
     {
         $this->cart = $cart;
     }
-
     /**
      * Handle an incoming request.
      *
@@ -25,11 +23,8 @@ class Sync
      */
     public function handle(Request $request, Closure $next)
     {
-        $this->cart->sync();
-        if ($this->cart->isChanged()) {
-            return response()->json([
-                'message' => 'Oh no, some items in your cart have changed. Please review these changes before placing your order.'
-            ], 409);
+        if ($this->cart->isEmpty()) {
+            abort(409,'Please order at least one product with quantity');
         }
         return $next($request);
     }

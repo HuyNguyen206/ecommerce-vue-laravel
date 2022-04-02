@@ -111,4 +111,9 @@ class Cart
         return $this->user->cart;
     }
 
+    public function orders()
+    {
+        return $this->user->orders;
+    }
+
 }

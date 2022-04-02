@@ -5,6 +5,7 @@ namespace Tests\Unit\Models\User;
 use App\Models\Address;
 use App\Models\Country;
 use App\Models\Order;
+use App\Models\PaymentMethod;
 use App\Models\ProductVariation;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -56,5 +57,14 @@ class UserTest extends TestCase
 
         $this->assertEquals(3,$user->orders()->count());
     }
+
+    public function test_it_has_many_payment_methods()
+    {
+        $user = User::factory()->create();
+        $user->paymentMethods()->saveMany(PaymentMethod::factory(3)->make());
+        $this->assertEquals(3, $user->paymentMethods()->count());
+    }
+
+
 
 }

@@ -2,6 +2,7 @@
 
 namespace Order;
 
+use App\Cart\Money;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\ProductVariation;
@@ -56,6 +57,23 @@ class OrderTest extends TestCase
            'quantity' => 2
         ]);
         $this->assertEquals(8, $order->products->sum('pivot.quantity'));
+    }
+
+    public function test_it_return_a_money_instance_for_the_subtotal()
+    {
+        $order = Order::factory()->create();
+        $this->assertInstanceOf(Money::class, $order->subtotal);
+    }
+
+    public function test_it_return_a_money_instance_for_the_total()
+    {
+        $order = Order::factory()->create();
+        $this->assertInstanceOf(Money::class, $order->total);
+    }
+    public function test_it_add_shipping_price_to_the_total()
+    {
+        $order = Order::factory()->create();
+        $this->assertEquals($order->total->amount(), $order->subtotal->add($order->shippingMethod->price)->amount());
     }
 
 

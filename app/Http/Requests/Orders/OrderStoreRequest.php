@@ -33,7 +33,12 @@ class OrderStoreRequest extends FormRequest
                 }
             }],
             'shipping_method_id' => ['required', Rule::exists('shipping_methods', 'id'),
-                new ValidShippingMethod($this->address_id)]
+                new ValidShippingMethod($this->address_id)],
+            'payment_method_id' => ['required', Rule::exists('payment_methods', 'id'), function($attribute, $value, $fail){
+                if (!$this->user()->paymentMethods()->where('id', $value)->exists()) {
+                    $fail('This payment_method doesnt belong to you');
+                }
+            }]
         ];
     }
 }

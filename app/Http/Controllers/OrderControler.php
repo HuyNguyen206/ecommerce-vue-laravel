@@ -11,18 +11,16 @@ use Illuminate\Http\Request;
 class OrderControler extends Controller
 {
     private $cart;
+
     public function __construct(Cart $cart)
     {
         $this->cart = $cart;
-        $this->middleware('auth');
+        $this->middleware(['auth']);
+        $this->middleware(['cart.sync', 'cart.responseEmptyCheck'])->except('index');
     }
 
     public function store(OrderStoreRequest $request)
     {
-        $this->cart->sync();
-        if ($this->cart->isEmpty()) {
-            abort(400,'Please order at least one product with quantity');
-        }
         $order = $this->createOrder($request);
         $order->products()->sync($this->cart->products()->forSyncing());
 //        $order->load('shippingMethod');
@@ -35,5 +33,17 @@ class OrderControler extends Controller
         return $request->user()->orders()->create(array_merge($request->validated(), [
             'subtotal' => $this->cart->subTotal()->amount()
         ]));
+    }
+
+    public function index(Request $request)
+    {
+        $orders = $request->user()->orders()->with([
+            'products.product',
+            'products.type',
+            'products.stock',
+            'address.country',
+            'shippingMethod'
+        ])->latest()->paginate(20);
+        return OrderResource::collection($orders);
     }
 }

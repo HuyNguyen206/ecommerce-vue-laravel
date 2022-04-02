@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Cart\Money;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -41,6 +42,16 @@ class Order extends Model
         return $this->belongsToMany(ProductVariation::class, 'product_variation_order')
             ->withPivot('quantity')
             ->withTimestamps();
+    }
+
+    public function getSubtotalAttribute($value)
+    {
+        return (new Money($value));
+    }
+
+    public function getTotalAttribute()
+    {
+        return $this->subtotal->add($this->shippingMethod->price);
     }
 
 }

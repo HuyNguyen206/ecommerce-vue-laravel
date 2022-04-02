@@ -21,7 +21,8 @@ Route::resources([
     'categories' => \App\Http\Controllers\CategoryController::class,
     'products' => \App\Http\Controllers\ProductController::class,
     'countries' => \App\Http\Controllers\CountryController::class,
-    'orders' => \App\Http\Controllers\OrderControler::class
+    'orders' => \App\Http\Controllers\OrderControler::class,
+    'payment-methods' => \App\Http\Controllers\PaymentMethodController::class
 ]);
 Route::resource('addresses',\App\Http\Controllers\AddressController::class)->only('index');
 Route::get('addresses/{address}/shippings', [\App\Http\Controllers\AddressController::class, 'getShippingMethods']);

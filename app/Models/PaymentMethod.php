@@ -6,10 +6,11 @@ use App\Models\Traits\UpdateDefault;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Address extends Model
+class PaymentMethod extends Model
 {
-    protected static $unguarded = true;
+
     use HasFactory, UpdateDefault;
+    protected static $unguarded = true;
     protected $casts = [
         'is_default' => 'boolean'
     ];
@@ -18,11 +19,4 @@ class Address extends Model
     {
         return $this->belongsTo(User::class);
     }
-
-    public function country()
-    {
-        return $this->belongsTo(Country::class);
-    }
-
-
 }

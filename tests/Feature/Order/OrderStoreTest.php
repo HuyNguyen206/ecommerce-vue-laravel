@@ -5,8 +5,10 @@ namespace Tests\Feature\Order;
 use App\Cart\Cart;
 use App\Events\OrderCreated;
 use App\Models\Address;
+use App\Models\PaymentMethod;
 use App\Models\ProductVariation;
 use App\Models\ShippingMethod;
+use App\Models\Stock;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
@@ -28,6 +30,7 @@ class OrderStoreTest extends TestCase
     public function test_it_required_address_id()
     {
         $user = User::factory()->create();
+        $this->prepareOrderData($user);
        $this->jsonAs($user, 'post', 'api/orders')
            ->assertJsonValidationErrors('address_id');
     }
@@ -38,6 +41,7 @@ class OrderStoreTest extends TestCase
            $address = Address::factory()->make()
         );
         $addressNot = Address::factory()->create();
+        $this->prepareOrderData($user);
        $this->jsonAs($user, 'post', 'api/orders', [
            'address_id' => $addressNot->id
        ])
@@ -46,7 +50,8 @@ class OrderStoreTest extends TestCase
     public function test_it_required_shipping_method_id()
     {
         $user = User::factory()->create();
-       $this->jsonAs($user, 'post', 'api/orders')
+        $this->prepareOrderData($user);
+        $this->jsonAs($user, 'post', 'api/orders')
            ->assertJsonValidationErrors('shipping_method_id');
     }
     public function test_it_required_shipping_method_id_exist()
@@ -55,7 +60,7 @@ class OrderStoreTest extends TestCase
         $user->addresses()->save(
             $address = Address::factory()->make()
         );
-
+        $this->prepareOrderData($user);
         $this->jsonAs($user, 'post', 'api/orders', [
            'shipping_method_id' => 1,
            'address_id' => $address->id
@@ -69,7 +74,7 @@ class OrderStoreTest extends TestCase
             $address = Address::factory()->make()
         );
 //        $address->country->shippingMethods()->attach($shipping = ShippingMethod::factory()->create());
-
+        $this->prepareOrderData($user);
         $this->jsonAs($user, 'post', 'api/orders', [
            'shipping_method_id' => ShippingMethod::factory()->create()->id,
            'address_id' => $address->id
@@ -82,10 +87,11 @@ class OrderStoreTest extends TestCase
 //        list($shipping, $address) = $this->orderDependencies($user);
         $product = $this->createProductWithStock($user);
         $user->refresh();
-        list($shipping, $address) = $this->orderDependencies($user);
+        list($shipping, $address, $paymentMethod) = $this->orderDependencies($user);
         $this->jsonAs($user, 'post', 'api/orders', [
            'shipping_method_id' => $shipping->id,
-           'address_id' => $address->id
+           'address_id' => $address->id,
+            'payment_method_id' => $paymentMethod->id
        ])->assertStatus(201);
     }
 
@@ -95,7 +101,8 @@ class OrderStoreTest extends TestCase
             $address = Address::factory()->make()
         );
         $address->country->shippingMethods()->attach($shipping = ShippingMethod::factory()->create());
-        return [$shipping, $address];
+        $user->paymentMethods()->save($paymentMethod = PaymentMethod::factory()->make());
+        return [$shipping, $address, $paymentMethod];
     }
 
     public function test_it_attach_the_products_to_the_order()
@@ -103,10 +110,11 @@ class OrderStoreTest extends TestCase
         $user = User::factory()->create();
         $product = $this->createProductWithStock($user);
         $user->refresh();
-        list($shipping, $address) = $this->orderDependencies($user);
+        list($shipping, $address, $paymentMethod) = $this->orderDependencies($user);
         $res = $this->jsonAs($user, 'post', 'api/orders', [
             'shipping_method_id' => $shipping->id,
-            'address_id' => $address->id
+            'address_id' => $address->id,
+            'payment_method_id' => $paymentMethod->id
         ]);
         $this->assertDatabaseHas('product_variation_order', [
             'order_id' => json_decode($res->getContent())->data->id,
@@ -121,10 +129,11 @@ class OrderStoreTest extends TestCase
         $user = User::factory()->create();
         $product = $this->createProductWithStock($user);
         $user->refresh();
-        list($shipping, $address) = $this->orderDependencies($user);
+        list($shipping, $address, $paymentMethod) = $this->orderDependencies($user);
         $res = $this->jsonAs($user, 'post', 'api/orders', [
             'shipping_method_id' => $shipping->id,
-            'address_id' => $address->id
+            'address_id' => $address->id,
+            'payment_method_id' => $paymentMethod->id
         ]);
        Event::assertDispatched(OrderCreated::class, function ($event) use($res){
            return $event->order->id === json_decode($res->getContent())->data->id;
@@ -136,11 +145,12 @@ class OrderStoreTest extends TestCase
         $user = User::factory()->create();
         $product = $this->createProductWithStock($user);
         $user->refresh();
-        list($shipping, $address) = $this->orderDependencies($user);
+        list($shipping, $address, $paymentMethod) = $this->orderDependencies($user);
         $this->jsonAs($user, 'post', 'api/orders', [
             'shipping_method_id' => $shipping->id,
-            'address_id' => $address->id
-        ])->assertStatus(200);
+            'address_id' => $address->id,
+            'payment_method_id' => $paymentMethod->id
+        ])->assertStatus(201);
         $user->refresh();
         $this->assertTrue($user->cart->isEmpty());
 
@@ -169,11 +179,19 @@ class OrderStoreTest extends TestCase
     {
         $user = User::factory()->create();
         $user->refresh();
-        list($shipping, $address) = $this->orderDependencies($user);
+        list($shipping, $address, $paymentMethod) = $this->orderDependencies($user);
         $this->jsonAs($user, 'post', 'api/orders', [
             'shipping_method_id' => $shipping->id,
-            'address_id' => $address->id
-        ])->assertStatus(400);
+            'address_id' => $address->id,
+            'payment_method_id' => $paymentMethod->id
+        ])->assertStatus(409);
+    }
+
+    private function prepareOrderData(&$user){
+        $user->cart()->attach($product = ProductVariation::factory()->create(), [
+            'quantity' => 2
+        ]);
+        $product->stocks()->save(Stock::factory()->create());
     }
 
 
