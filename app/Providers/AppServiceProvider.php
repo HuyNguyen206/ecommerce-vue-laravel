@@ -3,7 +3,12 @@
 namespace App\Providers;
 
 use App\Cart\Cart;
+use App\Http\Middleware\Cart\Payment\Gateway;
+use App\Http\Middleware\Cart\Payment\Gateways\StripeGateway;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Cashier\Cashier;
+use Stripe\Stripe;
+use Stripe\StripeClient;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,6 +22,11 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(Cart::class, function ($app) {
             return new Cart($app->auth->user());
         });
+        $this->app->singleton(Gateway::class, StripeGateway::class);
+        $this->app->singleton(StripeClient::class, function (){
+            return new StripeClient(config('services.stripe.secret'));
+        });
+        Cashier::ignoreMigrations();
     }
 
     /**
@@ -26,6 +36,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //
+        Stripe::setApiKey(config('services.stripe.secret'));
     }
 }

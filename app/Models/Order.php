@@ -54,5 +54,15 @@ class Order extends Model
         return $this->subtotal->add($this->shippingMethod->price);
     }
 
+    public function paymentMethod()
+    {
+        return $this->belongsTo(PaymentMethod::class);
+    }
+
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
+
 }
 

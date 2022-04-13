@@ -2,15 +2,18 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Middleware\Cart\Payment\Gateway;
 use App\Http\Resources\PaymentMethodResource;
 use App\Models\PaymentMethod;
 use Illuminate\Http\Request;
 
 class PaymentMethodController extends Controller
 {
-    public function __construct()
+    protected $gateway;
+    public function __construct(Gateway $gateway)
     {
         $this->middleware('auth');
+        $this->gateway = $gateway;
     }
 
     /**
@@ -41,7 +44,13 @@ class PaymentMethodController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'token' => 'required'
+        ]);
+        $card = $this->gateway->withUser($request->user())
+            ->createCustomer()
+            ->addCard($request->token);
+        return new PaymentMethodResource($card);
     }
 
     /**

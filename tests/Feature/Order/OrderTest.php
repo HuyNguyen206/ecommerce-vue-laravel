@@ -5,8 +5,10 @@ namespace Order;
 use App\Cart\Money;
 use App\Models\Address;
 use App\Models\Order;
+use App\Models\PaymentMethod;
 use App\Models\ProductVariation;
 use App\Models\ShippingMethod;
+use App\Models\Transaction;
 use App\Models\User;
 use Tests\TestCase;
 
@@ -33,6 +35,12 @@ class OrderTest extends TestCase
     {
         $order = Order::factory()->create();
         $this->assertInstanceOf(ShippingMethod::class, $order->shippingMethod);
+    }
+
+    public function test_it_belong_to_payment_method()
+    {
+        $order = Order::factory()->create();
+        $this->assertInstanceOf(PaymentMethod::class, $order->paymentMethod);
     }
 
     public function test_it_has_defalt_pending_state()
@@ -74,6 +82,13 @@ class OrderTest extends TestCase
     {
         $order = Order::factory()->create();
         $this->assertEquals($order->total->amount(), $order->subtotal->add($order->shippingMethod->price)->amount());
+    }
+
+    public function test_it_has_many_transactions()
+    {
+        $order = Order::factory()->create();
+        $order->transactions()->saveMany(Transaction::factory(5)->make());
+        $this->assertEquals(5, $order->transactions()->count());
     }
 
 

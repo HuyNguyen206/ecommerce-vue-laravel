@@ -7,7 +7,7 @@ use App\Events\OrderCreated;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
-class EmptyCart
+class EmptyCart implements ShouldQueue
 {
     protected $cart;
     /**
@@ -26,7 +26,7 @@ class EmptyCart
      * @param  \App\Events\OrderCreated  $event
      * @return void
      */
-    public function handle(OrderCreated $event)
+    public function handle()
     {
         $this->cart->emptyCart();
     }
